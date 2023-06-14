@@ -66,59 +66,51 @@ public class Trie {
 
         return pCrawl.isEndOfWord;
     }
-    public static List<String> autoComplete(String word){
-        List<String> wordsComplete = new ArrayList<>();
 
-        int level;
-        int length = word.length();
-        int index;
-        TrieNode pCrawl = root;
-        StringBuilder aa = new StringBuilder();
-        for (level = 0; level < length; level++) {
-            char ch = word.charAt(level);
-            if (Character.isLowerCase(ch)) {
-                index = ch - 'a';
-            } else if (Character.isUpperCase(ch)) {
-                index = ch - 'A' + 26;
-            } else {
-                continue;
-            }
-            aa.append(ch);
-            pCrawl = pCrawl.children[index];
+public static List<String> autoComplete(String word) {
+    List<String> wordsComplete = new ArrayList<>();
+
+    int length = word.length();
+    int index;
+    TrieNode pCrawl = root;
+
+    for (int level = 0; level < length; level++) {
+        char ch = word.charAt(level);
+        if (Character.isLowerCase(ch)) {
+            index = ch - 'a';
+        } else if (Character.isUpperCase(ch)) {
+            index = ch - 'A' + 26;
+        } else {
+            continue;
         }
-        TrieNode dpCrawl = root;
-        StringBuilder aa_copy;
-        for(int i=0; i<52; i++){
-            if(pCrawl.children[i] != null){
-                aa_copy = new StringBuilder(aa);
-                aa_copy.append(asciiToChar(i));
-                if(pCrawl.isEndOfWord){
-                    wordsComplete.add(String.valueOf(aa_copy));
-                    break;
-                }else {
-                    boolean end = false;
-                    int count = 0;
-                    dpCrawl = pCrawl.children[i];
-                    while (!end || count<52){
-                        count++;
-                        for(int it=0; it<52; it++){
-                            if(dpCrawl.children[it] != null){
-                                aa_copy.append(asciiToChar(it));
-                                dpCrawl = dpCrawl.children[it];
-                                if(dpCrawl.isEndOfWord){
-                                    wordsComplete.add(String.valueOf(aa_copy));
-                                    end = true;
-                                    break;
-                                }
-                                it = 0;
-                            }
-                        }
-                    }
-                }
-            }
+
+        if (pCrawl.children[index] == null) {
+            return wordsComplete;
         }
-        return wordsComplete;
+
+        pCrawl = pCrawl.children[index];
     }
+
+    autoCompleteDFS(pCrawl, new StringBuilder(word), wordsComplete);
+
+    return wordsComplete;
+}
+
+    private static void autoCompleteDFS(TrieNode node, StringBuilder prefix, List<String> wordsComplete) {
+        if (node.isEndOfWord) {
+            wordsComplete.add(prefix.toString());
+        }
+
+        for (int i = 0; i < 52; i++) {
+            if (node.children[i] != null) {
+                char ch = asciiToChar(i);
+                prefix.append(ch);
+                autoCompleteDFS(node.children[i], prefix, wordsComplete);
+                prefix.deleteCharAt(prefix.length() - 1);
+            }
+        }
+    }
+
     public static char asciiToChar(int i){
         if (i < 26){
             i += 97;
