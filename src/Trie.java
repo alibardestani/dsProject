@@ -2,20 +2,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Trie {
-    static class TrieNode{
+    private static class TrieNode {
         TrieNode[] children;
         boolean isEndOfWord;
 
         TrieNode() {
-            children = new TrieNode[52];  // Update array size to accommodate lowercase and uppercase letters
+            children = new TrieNode[52];
             isEndOfWord = false;
             for (int i = 0; i < 52; i++) {
                 children[i] = null;
             }
         }
     }
-    static TrieNode root;
-    static void insert(String key) {
+
+    private TrieNode root;
+
+    public Trie() {
+        root = new TrieNode();
+    }
+
+    public void insert(String key) {
         int level;
         int length = key.length();
         int index;
@@ -41,7 +47,8 @@ public class Trie {
 
         pCrawl.isEndOfWord = true;
     }
-    static boolean search(String key) {
+
+    public boolean search(String key) {
         int level;
         int length = key.length();
         int index;
@@ -67,36 +74,36 @@ public class Trie {
         return pCrawl.isEndOfWord;
     }
 
-public static List<String> autoComplete(String word) {
-    List<String> wordsComplete = new ArrayList<>();
+    public List<String> autoComplete(String word) {
+        List<String> wordsComplete = new ArrayList<>();
 
-    int length = word.length();
-    int index;
-    TrieNode pCrawl = root;
+        int length = word.length();
+        int index;
+        TrieNode pCrawl = root;
 
-    for (int level = 0; level < length; level++) {
-        char ch = word.charAt(level);
-        if (Character.isLowerCase(ch)) {
-            index = ch - 'a';
-        } else if (Character.isUpperCase(ch)) {
-            index = ch - 'A' + 26;
-        } else {
-            continue;
+        for (int level = 0; level < length; level++) {
+            char ch = word.charAt(level);
+            if (Character.isLowerCase(ch)) {
+                index = ch - 'a';
+            } else if (Character.isUpperCase(ch)) {
+                index = ch - 'A' + 26;
+            } else {
+                continue;
+            }
+
+            if (pCrawl.children[index] == null) {
+                return wordsComplete;
+            }
+
+            pCrawl = pCrawl.children[index];
         }
 
-        if (pCrawl.children[index] == null) {
-            return wordsComplete;
-        }
+        autoCompleteDFS(pCrawl, new StringBuilder(word), wordsComplete);
 
-        pCrawl = pCrawl.children[index];
+        return wordsComplete;
     }
 
-    autoCompleteDFS(pCrawl, new StringBuilder(word), wordsComplete);
-
-    return wordsComplete;
-}
-
-    private static void autoCompleteDFS(TrieNode node, StringBuilder prefix, List<String> wordsComplete) {
+    private void autoCompleteDFS(TrieNode node, StringBuilder prefix, List<String> wordsComplete) {
         if (node.isEndOfWord) {
             wordsComplete.add(prefix.toString());
         }
@@ -111,12 +118,12 @@ public static List<String> autoComplete(String word) {
         }
     }
 
-    public static char asciiToChar(int i){
-        if (i < 26){
+    private char asciiToChar(int i) {
+        if (i < 26) {
             i += 97;
-        }else {
-            i +=39;
+        } else {
+            i += 39;
         }
-        return (char)i;
+        return (char) i;
     }
 }
