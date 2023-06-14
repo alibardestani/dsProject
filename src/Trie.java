@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Trie {
     static class TrieNode{
         TrieNode[] children;
@@ -22,11 +25,10 @@ public class Trie {
         for (level = 0; level < length; level++) {
             char ch = key.charAt(level);
             if (Character.isLowerCase(ch)) {
-                index = ch - 'a';  // Calculate index for lowercase letters
+                index = ch - 'a';
             } else if (Character.isUpperCase(ch)) {
-                index = ch - 'A' + 26;  // Calculate index for uppercase letters
+                index = ch - 'A' + 26;
             } else {
-                // Skip non-alphabetic characters
                 continue;
             }
 
@@ -63,5 +65,66 @@ public class Trie {
         }
 
         return pCrawl.isEndOfWord;
+    }
+    public static List<String> autoComplete(String word){
+        List<String> wordsComplete = new ArrayList<>();
+
+        int level;
+        int length = word.length();
+        int index;
+        TrieNode pCrawl = root;
+        StringBuilder aa = new StringBuilder();
+        for (level = 0; level < length; level++) {
+            char ch = word.charAt(level);
+            if (Character.isLowerCase(ch)) {
+                index = ch - 'a';
+            } else if (Character.isUpperCase(ch)) {
+                index = ch - 'A' + 26;
+            } else {
+                continue;
+            }
+            aa.append(ch);
+            pCrawl = pCrawl.children[index];
+        }
+        TrieNode dpCrawl = root;
+        StringBuilder aa_copy;
+        for(int i=0; i<52; i++){
+            if(pCrawl.children[i] != null){
+                aa_copy = new StringBuilder(aa);
+                aa_copy.append(asciiToChar(i));
+                if(pCrawl.isEndOfWord){
+                    wordsComplete.add(String.valueOf(aa_copy));
+                    break;
+                }else {
+                    boolean end = false;
+                    int count = 0;
+                    dpCrawl = pCrawl.children[i];
+                    while (!end || count<52){
+                        count++;
+                        for(int it=0; it<52; it++){
+                            if(dpCrawl.children[it] != null){
+                                aa_copy.append(asciiToChar(it));
+                                dpCrawl = dpCrawl.children[it];
+                                if(dpCrawl.isEndOfWord){
+                                    wordsComplete.add(String.valueOf(aa_copy));
+                                    end = true;
+                                    break;
+                                }
+                                it = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return wordsComplete;
+    }
+    public static char asciiToChar(int i){
+        if (i < 26){
+            i += 97;
+        }else {
+            i +=39;
+        }
+        return (char)i;
     }
 }

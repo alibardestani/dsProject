@@ -9,6 +9,7 @@ public class Main extends Trie {
         for (String key : words) {
             insert(key);
         }
+        System.out.println(autoComplete("Af"));
 
     }
 }
