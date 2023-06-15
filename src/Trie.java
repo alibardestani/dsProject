@@ -102,6 +102,10 @@ public class Trie {
 
         autoCompleteDFS(pCrawl, new StringBuilder(word), wordsComplete);
 
+        if(wordsComplete.size() > 5){
+            wordsComplete = wordsComplete.subList(0,5);
+        }
+
         return wordsComplete;
     }
 
