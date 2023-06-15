@@ -20,24 +20,33 @@ public class Main extends Trie {
         }
 
         String[] ArrayWord;
-        String[] CopmleteArrayWord;
+        String[] CompleteArrayWord1;
+        String[] CompleteArrayWord2;
         String userInput = input.nextLine();
         ArrayWord = userInput.split(" ");
         for(int i=0; i<ArrayWord.length; i++){
-            if (!Keyboard.search(ArrayWord[i])){
-                CopmleteArrayWord = Keyboard.autoComplete(ArrayWord[i]).toArray(new String[0]);
-                System.out.println("Please Enter Index For "+ArrayWord[i]+" :\n"+ Arrays.toString(CopmleteArrayWord));
-                int x = input.nextInt();
-                ArrayWord[i] = CopmleteArrayWord[x];
+            if(!Analyze.search(ArrayWord[i]) && !Keyboard.search(ArrayWord[i])) {
+                CompleteArrayWord2 = Analyze.autoComplete(ArrayWord[i]).toArray(new String[0]);
+                if (CompleteArrayWord2.length < 5) {
+                    CompleteArrayWord1 = Keyboard.autoComplete(ArrayWord[i]).toArray(new String[0]);
+                    System.out.println("Please Enter Index For " + ArrayWord[i] + " :\n" + Arrays.toString(CompleteArrayWord2) + Arrays.toString(CompleteArrayWord1));
+                    int x = input.nextInt();
+                    if (x >= CompleteArrayWord2.length) {
+                        ArrayWord[i] = CompleteArrayWord1[x];
+                    } else {
+                        ArrayWord[i] = CompleteArrayWord2[x];
+                    }
+                } else {
+                    System.out.println("Please Enter Index For " + ArrayWord[i] + " :\n" + Arrays.toString(CompleteArrayWord2));
+                    int x = input.nextInt();
+                    ArrayWord[i] = CompleteArrayWord2[x];
+                }
                 for (String it : ArrayWord)
-                    System.out.print(it+" ");
+                    System.out.print(it + " ");
                 System.out.println();
             }
         }
-        Write.appendArrayListToFile(List.of(ArrayWord), "input.txt");
-
-
-
+        Write.appendArrayListToFile(List.of(ArrayWord), "D:\\learn\\Shiraz\\Ds\\DsProject\\src\\inputs.txt");
 
     }
 }
