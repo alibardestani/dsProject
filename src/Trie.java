@@ -1,14 +1,18 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class Trie {
     private static class TrieNode {
         TrieNode[] children;
         boolean isEndOfWord;
+        int frequency;
 
         TrieNode() {
             children = new TrieNode[52];
             isEndOfWord = false;
+            frequency = 0;
             for (int i = 0; i < 52; i++) {
                 children[i] = null;
             }
@@ -46,6 +50,7 @@ public class Trie {
         }
 
         pCrawl.isEndOfWord = true;
+        pCrawl.frequency++;
     }
 
     public boolean search(String key) {
@@ -100,7 +105,17 @@ public class Trie {
 
         autoCompleteDFS(pCrawl, new StringBuilder(word), wordsComplete);
 
-        return wordsComplete;
+        PriorityQueue<String> sortedWords = new PriorityQueue<>(Comparator.comparingInt(this::getFrequency).reversed());
+        sortedWords.addAll(wordsComplete);
+
+        List<String> topSuggestions = new ArrayList<>();
+        int count = 0;
+        while (count < 5 && !sortedWords.isEmpty()) {
+            topSuggestions.add(sortedWords.poll());
+            count++;
+        }
+
+        return topSuggestions;
     }
 
     private void autoCompleteDFS(TrieNode node, StringBuilder prefix, List<String> wordsComplete) {
@@ -125,5 +140,30 @@ public class Trie {
             i += 39;
         }
         return (char) i;
+    }
+
+    private int getFrequency(String word) {
+        TrieNode pCrawl = root;
+        int length = word.length();
+        int index;
+
+        for (int level = 0; level < length; level++) {
+            char ch = word.charAt(level);
+            if (Character.isLowerCase(ch)) {
+                index = ch - 'a';
+            } else if (Character.isUpperCase(ch)) {
+                index = ch - 'A' + 26;
+            } else {
+                continue;
+            }
+
+            if (pCrawl.children[index] == null) {
+                return 0;
+            }
+
+            pCrawl = pCrawl.children[index];
+        }
+
+        return pCrawl.frequency;
     }
 }
