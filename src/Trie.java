@@ -126,4 +126,9 @@ public class Trie {
         }
         return (char) i;
     }
+
+    public boolean spellCheck(String word) {
+        return search(word);
+    }
+
 }
