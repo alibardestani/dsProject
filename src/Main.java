@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -5,53 +7,64 @@ import java.util.Scanner;
 
 public class Main extends Trie {
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        List<String> words = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
+        Trie trie = new Trie();
+        Scanner scanner = new Scanner(System.in);
+        List<String> wordsTxt = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
         List<String> userInputs = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\inputs.txt");
 
-        Trie Keyboard = new Trie();
-        Trie Analyze = new Trie();
+//        System.out.print("Enter a sentence: ");
+//        String userInput = scanner.nextLine();
 
-        for (String key : words) {
-            Keyboard.insert(key);
-        }
-        for (String key : words) {
-            Analyze.insert(key);
+//        String[] words = userInput.split(" ");
+
+        for (String word : wordsTxt) {
+            trie.insert(word);
         }
 
-//        String[] ArrayWord;
-//        String[] CompleteArrayWord1;
-//        String[] CompleteArrayWord2;
-//        String userInput = input.nextLine();
-//        ArrayWord = userInput.split(" ");
-//        for(int i=0; i<ArrayWord.length; i++){
-//            if(!Analyze.search(ArrayWord[i]) && !Keyboard.search(ArrayWord[i])) {
-//                CompleteArrayWord2 = Analyze.autoComplete(ArrayWord[i]).toArray(new String[0]);
-//                if (CompleteArrayWord2.length < 5) {
-//                    CompleteArrayWord1 = Keyboard.autoComplete(ArrayWord[i]).toArray(new String[0]);
-//                    System.out.println("Please Enter Index For " + ArrayWord[i] + " :\n" + Arrays.toString(CompleteArrayWord2) + Arrays.toString(CompleteArrayWord1));
-//                    int x = input.nextInt();
-//                    if (x >= CompleteArrayWord2.length) {
-//                        ArrayWord[i] = CompleteArrayWord1[x];
-//                    } else {
-//                        ArrayWord[i] = CompleteArrayWord2[x];
-//                    }
-//                } else {
-//                    System.out.println("Please Enter Index For " + ArrayWord[i] + " :\n" + Arrays.toString(CompleteArrayWord2));
-//                    int x = input.nextInt();
-//                    ArrayWord[i] = CompleteArrayWord2[x];
+//        StringBuilder correctedSentence = new StringBuilder();
+//        for (String word : words) {
+//            List<String> suggestions = trie.autoComplete(word);
+//
+//            if (suggestions.isEmpty()) {
+//                correctedSentence.append(word).append(" ");
+//            } else if (!trie.search(word)) {
+//                System.out.println("Autocomplete suggestions for \"" + word + "\":");
+//                System.out.println(0+". "+word);
+//                for (int i = 0; i < suggestions.size(); i++) {
+//                    System.out.println((i + 1) + ". " + suggestions.get(i));
 //                }
-//                for (String it : ArrayWord)
-//                    System.out.print(it + " ");
-//                System.out.println();
+//
+//                System.out.print("Choose a suggestion (1-" + suggestions.size() + "), or 0 to keep the word: ");
+//                int choice = scanner.nextInt();
+//
+//                if (choice >= 1 && choice <= suggestions.size()) {
+//                    String chosenSuggestion = suggestions.get(choice - 1);
+//                    correctedSentence.append(chosenSuggestion).append(" ");
+//                }else if (choice == 0){
+//                    correctedSentence.append(word).append(" ");
+//                }else {
+//                    correctedSentence.append(word).append(" ");
+//                }
+//            } else {
+//                correctedSentence.append(word).append(" ");
 //            }
 //        }
+//
+//        String correctedInput = correctedSentence.toString().trim();
+//        System.out.println("Corrected sentence: " + correctedInput);
+
+
+
+
+        // SUJJEST WORD ****************
 
         System.out.print("Enter a misspelled word: ");
-        String misspelledWord = input.nextLine();
+        String misspelledWord = scanner.nextLine();
 
-        List<String> suggestions = Keyboard.CorrectionSuggestions(misspelledWord);
-        
+        // Get correction suggestions for the misspelled word
+        List<String> suggestions = trie.CorrectionSuggestions(misspelledWord);
+
+        // Print the suggestions
         System.out.println("Correction suggestions for '" + misspelledWord + "':");
         for (int i = 0; i < suggestions.size(); i++) {
             System.out.println((i + 1) + ". " + suggestions.get(i));
@@ -59,18 +72,26 @@ public class Main extends Trie {
 
         if (!suggestions.isEmpty()) {
             System.out.print("Enter the number of the suggestion to replace with: ");
-            int choice = input.nextInt();
+            int choice = scanner.nextInt();
 
             if (choice >= 1 && choice <= suggestions.size()) {
                 String selectedSuggestion = suggestions.get(choice - 1);
                 String correctedWord = selectedSuggestion.substring(0, selectedSuggestion.indexOf(" (distance:"));
 
                 System.out.println("Selected suggestion: " + correctedWord);
+
+                // Replace the misspelled word with the selected suggestion
+                // You can now use the correctedWord variable in your code
             } else {
                 System.out.println("Invalid choice.");
             }
         } else {
             System.out.println("No suggestions available.");
         }
+
+
+
+
+//        Write.appendStringToFile(correctedInput, "D:\\learn\\Shiraz\\Ds\\DsProject\\src\\inputs.txt");
     }
 }
