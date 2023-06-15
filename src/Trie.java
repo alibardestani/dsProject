@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 public class Trie {
@@ -129,6 +131,83 @@ public class Trie {
 
     public boolean spellCheck(String word) {
         return search(word);
+    }
+
+    public List<String>CorrectionSuggestions(String misspelledWord){
+        List<String> suggestions = new ArrayList<>();
+        String longestPrefix = getLongestPrefix(misspelledWord);
+        List<String> prefixSuggestions = autoComplete(longestPrefix);
+        for(String suggestion : prefixSuggestions){
+            int distance = calculateDistance(misspelledWord, suggestion);
+            suggestions.add(suggestion + " (distance: "+distance+" )");
+        }
+        suggestions.sort(Comparator.comparingInt(Trie::getDistanceFormSuggestion));
+
+        if(suggestions.size() > 5){
+            suggestions = suggestions.subList(0,5);
+        }
+        return suggestions;
+    }
+    private static int getDistanceFormSuggestion(String suggestion){
+        int index = suggestion.lastIndexOf(" (distance: ");
+        String distanceString = suggestion.substring(index + 12, suggestion.length() - 1).trim();
+        return Integer.parseInt(distanceString);
+    }
+    private String getLongestPrefix(String word){
+        int length = word.length();
+        StringBuilder prefix = new StringBuilder();
+
+        TrieNode pCrawl = root;
+
+        for (int level = 0; level < length; level++){
+            char ch = word.charAt(level);
+            int index = getIndexFromChar(ch);
+
+            if (pCrawl.children[index] == null){
+                break;
+            }
+
+            pCrawl = pCrawl.children[index];
+            prefix.append(ch);
+            if (pCrawl.isEndOfWord){
+                break;
+            }
+        }
+        return prefix.toString();
+    }
+    private int getIndexFromChar(char ch){
+        if (Character.isLowerCase(ch)){
+            return ch - 'a';
+        } else if(Character.isUpperCase(ch)){
+            return ch - 'A' + 26;
+        }else {
+            return -1;
+        }
+    }
+    private int calculateDistance(String word1, String word2) {
+        int m = word1.length();
+        int n = word2.length();
+
+        int[][] dp = new int[m + 1][n + 1];
+
+        for (int i = 0; i <= m; i++) {
+            dp[i][0] = i;
+        }
+        for (int j = 0; j <= n; j++) {
+            dp[0][j] = j;
+        }
+
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (word1.charAt(i - 1) != word2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }
+            }
+        }
+
+        return dp[m][n];
     }
 
 }
