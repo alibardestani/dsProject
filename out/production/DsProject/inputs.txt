@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 habit 
 habit 
+||||||| f0db492
+=======
+name island album  
+>>>>>>> autocomplete
