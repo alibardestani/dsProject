@@ -15,12 +15,12 @@ public class Main extends Trie {
         for (String wordd : wordsReverse){
             trieReverse.insert(wordd);
         }
-//        System.out.println("Trie contains 'apple': " + trie.search("apple"));
-//        System.out.println("Trie contains 'apple': " + trie.autocomplete("ap"));
+//        System.out.println("Trie contains 'apple': " + trie.search("tes"));
+//        System.out.println(trie.autocomplete("ti"));
 //        System.out.println("Trie contains 'apple': " + trie.distance("llll","ap"));
-        for(Object word : ConnectTwoArray(trie.Suggestions("ple"),trieReverse.Suggestions(String.valueOf(new StringBuilder("ple").reverse())))){
-            System.out.println(word);
-        }
+        //for(Object word : ConnectTwoArray(trie.Suggestions("ple"),trieReverse.Suggestions(String.valueOf(new StringBuilder("ple").reverse())))){
+            //System.out.println(word);
+        //}
 
 
     }
