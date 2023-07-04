@@ -18,9 +18,9 @@ public class Main extends Trie {
         for (String wordd : wordsReverse){
             trieReverse.insert(wordd);
         }
-        System.out.println("Trie contains 'apple': " + trie.search("apple"));
-        System.out.println("Trie contains 'elppla': " + trieReverse.search("elppa"));
-
+//        System.out.println("Trie contains 'apple': " + trie.search("apple"));
+//        System.out.println("Trie contains 'apple': " + trie.autocomplete("ap"));
+        System.out.println("Trie contains 'apple': " + trie.distance("llll","ap"));
 
     }
 }
