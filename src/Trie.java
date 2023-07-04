@@ -101,4 +101,18 @@ class Trie {
         }
         return dis;
     }
+
+    public ArrayList<ArrayList<Object>> Suggestions(String fix){
+        ArrayList<ArrayList<Object>> sug = new ArrayList<>();
+        List<String> prefix = new ArrayList<>();
+        prefix = autocomplete(fix);
+        for(String word : prefix){
+            ArrayList<Object> row = new ArrayList<>();
+            row.add(word);
+            row.add(distance(fix,word));
+            sug.add(row);
+        }
+
+        return sug;
+    }
 }
