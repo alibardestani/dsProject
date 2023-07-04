@@ -13,14 +13,28 @@ public class Read {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] lineWords = line.split(" ");
-                for (String word : lineWords) {
-                    words.add(word);
-                }
+                words.addAll(Arrays.asList(lineWords));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        return words;
+    }
+    public static List<String> readReverceWordFromFile(String filename){
+        List<String> words = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] lineWords = line.split("\\s+");
+                for (String word : lineWords) {
+                    StringBuilder reversedWord = new StringBuilder(word).reverse();
+                    words.add(String.valueOf(reversedWord));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return words;
     }
 }

@@ -1,67 +1,51 @@
-public class Trie {
-    static class TrieNode{
-        TrieNode[] children;
-        boolean isEndOfWord;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
-        TrieNode() {
-            children = new TrieNode[52];  // Update array size to accommodate lowercase and uppercase letters
-            isEndOfWord = false;
-            for (int i = 0; i < 52; i++) {
-                children[i] = null;
-            }
-        }
+class TrieNode {
+    private static final int ALPHABET_SIZE = 26;
+    TrieNode[] children;
+    boolean isEndOfWord;
+
+    public TrieNode() {
+        children = new TrieNode[ALPHABET_SIZE];
+        isEndOfWord = false;
     }
-    static TrieNode root;
-    static void insert(String key) {
-        int level;
-        int length = key.length();
-        int index;
+}
 
-        TrieNode pCrawl = root;
+class Trie {
+    private TrieNode root;
 
-        for (level = 0; level < length; level++) {
-            char ch = key.charAt(level);
-            if (Character.isLowerCase(ch)) {
-                index = ch - 'a';  // Calculate index for lowercase letters
-            } else if (Character.isUpperCase(ch)) {
-                index = ch - 'A' + 26;  // Calculate index for uppercase letters
-            } else {
-                // Skip non-alphabetic characters
-                continue;
-            }
-
-            if (pCrawl.children[index] == null) {
-                pCrawl.children[index] = new TrieNode();
-            }
-
-            pCrawl = pCrawl.children[index];
-        }
-
-        pCrawl.isEndOfWord = true;
+    public Trie() {
+        root = new TrieNode();
     }
-    static boolean search(String key) {
-        int level;
-        int length = key.length();
-        int index;
-        TrieNode pCrawl = root;
 
-        for (level = 0; level < length; level++) {
-            char ch = key.charAt(level);
-            if (Character.isLowerCase(ch)) {
-                index = ch - 'a';
-            } else if (Character.isUpperCase(ch)) {
-                index = ch - 'A' + 26;
-            } else {
-                continue;
+    public void insert(String word) {
+        TrieNode current = root;
+        for (int i = 0; i < word.length(); i++) {
+            char ch = Character.toLowerCase(word.charAt(i));
+            if (!Character.isLetter(ch)) {
+                continue; // Ignore non-alphabetic characters
             }
+            int index = ch - 'a';
+            if (current.children[index] == null) {
+                current.children[index] = new TrieNode();
+            }
+            current = current.children[index];
+        }
+        current.isEndOfWord = true;
+    }
 
-            if (pCrawl.children[index] == null) {
+    public boolean search(String word) {
+        TrieNode current = root;
+        for (int i = 0; i < word.length(); i++) {
+            char ch = word.charAt(i);
+            int index = Character.toLowerCase(ch) - 'a';
+            if (current.children[index] == null) {
                 return false;
             }
-
-            pCrawl = pCrawl.children[index];
+            current = current.children[index];
         }
-
-        return pCrawl.isEndOfWord;
+        return current != null && current.isEndOfWord;
     }
 }
