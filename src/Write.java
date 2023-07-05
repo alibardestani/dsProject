@@ -2,13 +2,14 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Write {
-    public static void Write(ArrayList<String> arrayList, String fileName) {
+    public static void Write(List<String> stringList, String fileName) {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 
-            for (String item : arrayList) {
+            for (String item : stringList) {
                 writer.write(item);
                 writer.newLine();
             }
