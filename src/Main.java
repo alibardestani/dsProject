@@ -26,7 +26,7 @@ public class Main extends Trie {
                     for(String word : str){
                         System.out.print(word+" ");
                     }
-                    System.out.println("\n===> "+str[i]+"\n1-AutoComplete\n2-Suggestions");
+                    System.out.println("\n===> "+str[i]+"\n1-AutoComplete\n2-Spell Check\n3-Suggestions");
                     int choice = input.nextInt();
                     switch (choice) {
                         case 1 -> {
@@ -40,7 +40,17 @@ public class Main extends Trie {
                             History.add(str[i]);
                             System.out.println("History\t"+History+"\t"+str[i]);
                         }
-                        case 2 -> {
+                        case 2->{
+                            if(trie.search(str[i])){
+                                System.out.println("It is Ok!");
+                                History.add(str[i]);
+                            }
+                            else {
+                                System.out.println("It isn't find in our dictionary");
+                                i--;
+                            }
+                        }
+                        case 3 -> {
                             ArrayList<HashMap<String, Integer>> suggestions = ConnectTwoArray(trie.Suggestions(str[i]), trieReverse.Suggestions(new StringBuilder(str[i]).reverse().toString()));
                             ArrayList<HashMap<String, Integer>> NewSug = sortList(suggestions,History);
                             for (int index = 0; index < NewSug.size(); index++) {
@@ -87,13 +97,10 @@ public class Main extends Trie {
         ArrayList<HashMap<String, Integer>> combined = new ArrayList<>(pre);
         combined.addAll(suf);
 
-        // Sort the combined ArrayList based on the Integer values in ascending order
         combined.sort(Comparator.comparingInt(hashMap -> hashMap.values().iterator().next()));
 
-        // Create a new ArrayList to hold the top five HashMaps with the minimum Integer values
         ArrayList<HashMap<String, Integer>> result = new ArrayList<>();
 
-        // Retrieve the top five elements from the combined ArrayList
         for (int i = 0; i < Math.min(5, combined.size()); i++) {
             HashMap<String, Integer> hashMap = combined.get(i);
             result.add(hashMap);
@@ -117,14 +124,12 @@ public class Main extends Trie {
 
     public static List<String> sortList(List<String> list1, List<String> list2) {
         Map<String, Integer> wordCount = new HashMap<>();
-        // Count the occurrences of words from List2 in List1
         for (String word : list2) {
             if (list1.contains(word)) {
                 wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
             }
         }
 
-        // Sort List1 based on the word count in descending order
         list1.sort((a, b) -> wordCount.getOrDefault(b, 0) - wordCount.getOrDefault(a, 0));
 
         return list1;
@@ -132,7 +137,6 @@ public class Main extends Trie {
     public static ArrayList<HashMap<String, Integer>> sortList(ArrayList<HashMap<String, Integer>> list1, List<String> list2) {
         HashMap<String, Integer> wordCount = new HashMap<>();
 
-        // Count the occurrences of words from List2 in List1
         for (HashMap<String, Integer> word : list1) {
             String wordString = word.keySet().iterator().next();
             if (list2.contains(wordString)) {
@@ -140,7 +144,6 @@ public class Main extends Trie {
             }
         }
 
-        // Sort List1 based on the word count in descending order
         list1.sort((a, b) -> wordCount.getOrDefault(b.keySet().iterator().next(), 0) -
                 wordCount.getOrDefault(a.keySet().iterator().next(), 0));
 

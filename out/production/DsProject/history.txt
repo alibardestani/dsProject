@@ -5,3 +5,7 @@ myself
 name
 high
 high
+hi
+hi
+hello
+nam
