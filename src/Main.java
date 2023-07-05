@@ -1,96 +1,204 @@
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import java.util.*;
 
-public class Main extends Trie {
-    public static void main(String[] args) {
-        List<String> words = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
-        List<String> wordsReverse = Read.readReverceWordFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
-        List<String> History = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
-        Trie trie = new Trie();
-        Trie trieReverse = new Trie();
+public class Main extends Application {
+    private List<String> words;
+    private List<String> wordsReverse;
+    private List<String> history;
+    private Trie trie;
+    private Trie trieReverse;
 
-        Scanner input = new Scanner(System.in);
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        readWordsFromFile();
+        trie = new Trie();
+        trieReverse = new Trie();
 
         for (String word : words) {
             trie.insert(word);
         }
-        for (String word : wordsReverse){
+        for (String word : wordsReverse) {
             trieReverse.insert(word);
         }
-        boolean eof = false;
-        while (!eof){
-            boolean flag = false;
-            System.out.println("Please Enter String");
-            String[] str = input.nextLine().split(" ");
-            while (!flag){
-                for(int i = 0; i<str.length; i++){
-                    for(String word : str){
-                        System.out.print(word+" ");
-                    }
-                    System.out.println("\n===> "+str[i]+"\n1-AutoComplete\n2-Spell Check\n3-Suggestions");
-                    int choice = input.nextInt();
-                    switch (choice) {
-                        case 1 -> {
-                            List<String> NewSug = sortList(trie.autocomplete(str[i]),History);
-                            for (int it = 0; it < NewSug.size(); it++) {
-                                System.out.println(it + "\t" + NewSug.get(it));
-                            }
-                            int SeChoice = input.nextInt();
-                            str[i] = NewSug.get(SeChoice);
-                            System.out.println();
-                            History.add(str[i]);
-                            System.out.println("History\t"+History+"\t"+str[i]);
-                        }
-                        case 2->{
-                            if(trie.search(str[i])){
-                                System.out.println("It is Ok!");
-                                History.add(str[i]);
-                            }
-                            else {
-                                System.out.println("It isn't find in our dictionary");
-                                i--;
-                            }
-                        }
-                        case 3 -> {
-                            ArrayList<HashMap<String, Integer>> suggestions = ConnectTwoArray(trie.Suggestions(str[i]), trieReverse.Suggestions(new StringBuilder(str[i]).reverse().toString()));
-                            ArrayList<HashMap<String, Integer>> NewSug = sortList(suggestions,History);
-                            for (int index = 0; index < NewSug.size(); index++) {
-                                HashMap<String, Integer> suggestion = NewSug.get(index);
-                                for (Map.Entry<String, Integer> entry : suggestion.entrySet()) {
-                                    String key = entry.getKey();
-                                    Integer value = entry.getValue();
-                                    System.out.println(index + "\t" + key + "\t=> " + value);
-                                }
-                            }
 
-                            int userChoice = input.nextInt();
+        VBox root = new VBox(10);
+        root.setPrefWidth(400);
+        root.setPrefHeight(300);
 
-                            if (userChoice >= 0 && userChoice < NewSug.size()) {
-                                HashMap<String, Integer> suggestion = NewSug.get(userChoice);
-                                String chosenString = suggestion.keySet().iterator().next();
-                                System.out.println("User chose: " + chosenString);
-                                str[i] = chosenString;
-                                History.add(chosenString);
-                            } else {
-                                System.out.println("Invalid choice.");
-                            }
-                        }
-                        default -> flag = true;
+        Label inputLabel = new Label("Please Enter String:");
+        TextField inputField = new TextField();
+
+        ListView<String> listView = new ListView<>();
+        listView.setPrefHeight(150);
+
+        Button processButton = new Button("Process");
+        processButton.setOnAction(e -> processInput(inputField.getText(), listView));
+
+        root.getChildren().addAll(inputLabel, inputField, listView, processButton);
+
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("JavaFX Trie Application");
+        primaryStage.show();
+    }
+
+    private void readWordsFromFile() {
+        words = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
+        wordsReverse = Read.readReverceWordFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
+        history = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
+    }
+
+    private void processInput(String input, ListView<String> listView) {
+        List<String> str = Arrays.asList(input.split(" "));
+
+        for (int i = 0; i < str.size(); i++) {
+            String word = str.get(i);
+            listView.getItems().add(word);
+            System.out.println("\n===> " + word);
+            int choice = showChoiceDialog();
+
+            switch (choice) {
+                case 1 -> {
+                    List<String> newSuggestions = sortList(trie.autocomplete(word), history);
+                    int selectedChoice = showListDialog(newSuggestions);
+                    if (selectedChoice != -1) {
+                        str.set(i, newSuggestions.get(selectedChoice));
+                        System.out.println();
+                        history.add(newSuggestions.get(selectedChoice));
+                        System.out.println("History\t" + history + "\t" + newSuggestions.get(selectedChoice));
                     }
                 }
-                flag = true;
+                case 2 -> {
+                    if (trie.search(word) || trieReverse.search(word)) {
+                        System.out.println("It is Ok!");
+                    } else {
+                        i--;
+                    }
+                }
+                case 3 -> {
+                    ArrayList<HashMap<String, Integer>> suggestions = ConnectTwoArray(
+                            trie.Suggestions(word), reverseStrings(trieReverse.Suggestions(new StringBuilder(word).reverse().toString())));
+                    ArrayList<HashMap<String, Integer>> newSuggestions = sortList(suggestions, history);
+                    int userChoice = showHashMapDialog(newSuggestions);
+                    if (userChoice >= 0 && userChoice < newSuggestions.size()) {
+                        HashMap<String, Integer> suggestion = newSuggestions.get(userChoice);
+                        String chosenString = suggestion.keySet().iterator().next();
+                        System.out.println("User chose: " + chosenString);
+                        str.set(i, chosenString);
+                        history.add(chosenString);
+                    } else {
+                        System.out.println("Invalid choice.");
+                    }
+                }
+                default -> {
+                    // Do nothing
+                }
             }
-            for(String word : str){
-                System.out.print(word+" ");
-            }
-            Write.WriteToFile(History,"D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
-            System.out.println("Do You Want To Continue?\n1-Yes\n2-No");
-            int LastChoice = input.nextInt();
-            if(LastChoice != 1){
-                eof = true;
-            }
-            input.nextInt();
         }
-        System.out.println("Finish Program");
+
+        listView.getItems().clear();
+        listView.getItems().addAll(str);
+        Write.WriteToFile(history, "D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
+
+        int lastChoice = showContinueDialog();
+        if (lastChoice != 1) {
+            Platform.exit();
+        }
+    }
+
+    private int showChoiceDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Choice");
+        alert.setHeaderText(null);
+        alert.setContentText("Choose an action:");
+        ButtonType autoCompleteButton = new ButtonType("AutoComplete");
+        ButtonType spellCheckButton = new ButtonType("Spell Check");
+        ButtonType suggestionsButton = new ButtonType("Suggestions");
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(autoCompleteButton, spellCheckButton, suggestionsButton, cancelButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent()) {
+            if (result.get() == autoCompleteButton) {
+                return 1;
+            } else if (result.get() == spellCheckButton) {
+                return 2;
+            } else if (result.get() == suggestionsButton) {
+                return 3;
+            }
+        }
+        return 0;
+    }
+
+    private int showListDialog(List<String> suggestions) {
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(suggestions.get(0), suggestions);
+        dialog.setTitle("AutoComplete");
+        dialog.setHeaderText("Select a suggestion:");
+        dialog.setContentText("Suggestion:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            return suggestions.indexOf(result.get());
+        }
+        return -1;
+    }
+
+    private int showHashMapDialog(ArrayList<HashMap<String, Integer>> suggestions) {
+        ListView<String> listView = new ListView<>();
+        for (HashMap<String, Integer> suggestion : suggestions) {
+            String key = suggestion.keySet().iterator().next();
+            Integer value = suggestion.get(key);
+            listView.getItems().add(key + " => " + value);
+        }
+
+        Dialog<Integer> dialog = new Dialog<>();
+        dialog.setTitle("Suggestions");
+        dialog.setHeaderText("Select a suggestion:");
+        dialog.getDialogPane().setContent(listView);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                int index = listView.getSelectionModel().getSelectedIndex();
+                if (index >= 0 && index < suggestions.size()) {
+                    return index;
+                }
+            }
+            return -1;
+        });
+
+        Optional<Integer> result = dialog.showAndWait();
+        return result.orElse(-1);
+    }
+
+    private int showContinueDialog() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Continue?");
+        alert.setHeaderText(null);
+        alert.setContentText("Do you want to continue?");
+        ButtonType yesButton = new ButtonType("Yes");
+        ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(yesButton, noButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent()) {
+            if (result.get() == yesButton) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     public static ArrayList<HashMap<String, Integer>> ConnectTwoArray(ArrayList<HashMap<String, Integer>> pre, ArrayList<HashMap<String, Integer>> suf) {
@@ -109,7 +217,7 @@ public class Main extends Trie {
         return result;
     }
 
-    private static void reverseStrings(ArrayList<HashMap<String, Integer>> list) {
+    private static ArrayList<HashMap<String, Integer>> reverseStrings(ArrayList<HashMap<String, Integer>> list) {
         for (HashMap<String, Integer> hashMap : list) {
             for (Map.Entry<String, Integer> entry : hashMap.entrySet()) {
                 String key = entry.getKey();
@@ -120,6 +228,7 @@ public class Main extends Trie {
                 hashMap.remove(key);
             }
         }
+        return list;
     }
 
     public static List<String> sortList(List<String> list1, List<String> list2) {
@@ -134,6 +243,7 @@ public class Main extends Trie {
 
         return list1;
     }
+
     public static ArrayList<HashMap<String, Integer>> sortList(ArrayList<HashMap<String, Integer>> list1, List<String> list2) {
         HashMap<String, Integer> wordCount = new HashMap<>();
 
@@ -148,5 +258,14 @@ public class Main extends Trie {
                 wordCount.getOrDefault(a.keySet().iterator().next(), 0));
 
         return list1;
+    }
+
+    private void initializeTrie(Trie trie, Trie trieReverse, List<String> words, List<String> wordsReverse) {
+        for (String word : words) {
+            trie.insert(word);
+        }
+        for (String word : wordsReverse) {
+            trieReverse.insert(word);
+        }
     }
 }
