@@ -16,61 +16,71 @@ public class Main extends Trie {
         for (String word : wordsReverse){
             trieReverse.insert(word);
         }
-
-        boolean flag = false;
-        System.out.println("Please Enter String");
-        String[] str = input.nextLine().split(" ");
-        while (!flag){
-            for(int i = 0; i<str.length; i++){
-                for(String word : str){
-                    System.out.print(word+" ");
-                }
-                System.out.println("\n===> "+str[i]+"\n1-AutoComplete\n2-Suggestions");
-                int choice = input.nextInt();
-                switch (choice) {
-                    case 1 -> {
-                        List<String> NewSug = sortList(trie.autocomplete(str[i]),History);
-                        for (int it = 0; it < NewSug.size(); it++) {
-                            System.out.println(it + "\t" + NewSug.get(it));
-                        }
-                        int SeChoice = input.nextInt();
-                        str[i] = trie.autocomplete(str[i]).get(SeChoice);
-                        System.out.println();
-                        History.add(str[i]);
+        boolean eof = false;
+        while (!eof){
+            boolean flag = false;
+            System.out.println("Please Enter String");
+            String[] str = input.nextLine().split(" ");
+            while (!flag){
+                for(int i = 0; i<str.length; i++){
+                    for(String word : str){
+                        System.out.print(word+" ");
                     }
-                    case 2 -> {
-                        ArrayList<HashMap<String, Integer>> suggestions = ConnectTwoArray(trie.Suggestions(str[i]), trieReverse.Suggestions(new StringBuilder(str[i]).reverse().toString()));
-                        ArrayList<HashMap<String, Integer>> NewSug = sortList(suggestions,History);
-                        for (int index = 0; index < NewSug.size(); index++) {
-                            HashMap<String, Integer> suggestion = NewSug.get(index);
-                            for (Map.Entry<String, Integer> entry : suggestion.entrySet()) {
-                                String key = entry.getKey();
-                                Integer value = entry.getValue();
-                                System.out.println(index + "\t" + key + "\t=> " + value);
+                    System.out.println("\n===> "+str[i]+"\n1-AutoComplete\n2-Suggestions");
+                    int choice = input.nextInt();
+                    switch (choice) {
+                        case 1 -> {
+                            List<String> NewSug = sortList(trie.autocomplete(str[i]),History);
+                            for (int it = 0; it < NewSug.size(); it++) {
+                                System.out.println(it + "\t" + NewSug.get(it));
+                            }
+                            int SeChoice = input.nextInt();
+                            str[i] = NewSug.get(SeChoice);
+                            System.out.println();
+                            History.add(str[i]);
+                            System.out.println("History\t"+History+"\t"+str[i]);
+                        }
+                        case 2 -> {
+                            ArrayList<HashMap<String, Integer>> suggestions = ConnectTwoArray(trie.Suggestions(str[i]), trieReverse.Suggestions(new StringBuilder(str[i]).reverse().toString()));
+                            ArrayList<HashMap<String, Integer>> NewSug = sortList(suggestions,History);
+                            for (int index = 0; index < NewSug.size(); index++) {
+                                HashMap<String, Integer> suggestion = NewSug.get(index);
+                                for (Map.Entry<String, Integer> entry : suggestion.entrySet()) {
+                                    String key = entry.getKey();
+                                    Integer value = entry.getValue();
+                                    System.out.println(index + "\t" + key + "\t=> " + value);
+                                }
+                            }
+
+                            int userChoice = input.nextInt();
+
+                            if (userChoice >= 0 && userChoice < NewSug.size()) {
+                                HashMap<String, Integer> suggestion = NewSug.get(userChoice);
+                                String chosenString = suggestion.keySet().iterator().next();
+                                System.out.println("User chose: " + chosenString);
+                                str[i] = chosenString;
+                                History.add(chosenString);
+                            } else {
+                                System.out.println("Invalid choice.");
                             }
                         }
-
-                        int userChoice = input.nextInt();
-
-                        if (userChoice >= 0 && userChoice < NewSug.size()) {
-                            HashMap<String, Integer> suggestion = NewSug.get(userChoice);
-                            String chosenString = suggestion.keySet().iterator().next();
-                            System.out.println("User chose: " + chosenString);
-                            str[i] = chosenString;
-                            History.add(chosenString);
-                        } else {
-                            System.out.println("Invalid choice.");
-                        }
+                        default -> flag = true;
                     }
-                    default -> flag = true;
                 }
+                flag = true;
             }
-            flag = true;
+            for(String word : str){
+                System.out.print(word+" ");
+            }
+            Write.WriteToFile(History,"D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
+            System.out.println("Do You Want To Continue?\n1-Yes\n2-No");
+            int LastChoice = input.nextInt();
+            if(LastChoice != 1){
+                eof = true;
+            }
+            input.nextInt();
         }
-        for(String word : str){
-            System.out.print(word+" ");
-        }
-        Write.WriteToFile(History,"D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
+        System.out.println("Finish Program");
     }
 
     public static ArrayList<HashMap<String, Integer>> ConnectTwoArray(ArrayList<HashMap<String, Integer>> pre, ArrayList<HashMap<String, Integer>> suf) {
