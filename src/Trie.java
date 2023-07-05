@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 class TrieNode {
@@ -102,15 +103,14 @@ class Trie {
         return dis;
     }
 
-    public ArrayList<ArrayList<Object>> Suggestions(String fix){
-        ArrayList<ArrayList<Object>> sug = new ArrayList<>();
-        List<String> prefix = new ArrayList<>();
-        prefix = autocomplete(fix);
-        for(String word : prefix){
-            ArrayList<Object> row = new ArrayList<>();
-            row.add(word);
-            row.add(distance(fix,word));
-            sug.add(row);
+    public ArrayList<HashMap<String, Integer>> Suggestions(String fix) {
+        ArrayList<HashMap<String, Integer>> sug = new ArrayList<>();
+        List<String> prefix = autocomplete(fix);
+        for (String word : prefix) {
+            HashMap<String, Integer> suggestion = new HashMap<>();
+            suggestion.put("word", Integer.valueOf(word));
+            suggestion.put("distance", distance(fix, word));
+            sug.add(suggestion);
         }
 
         return sug;

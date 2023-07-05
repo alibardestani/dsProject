@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main extends Trie {
     public static void main(String[] args) {
@@ -32,8 +29,9 @@ public class Main extends Trie {
                 int choice = input.nextInt();
                 switch (choice) {
                     case 1 -> {
-                        for (int it = 0; it < trie.autocomplete(str[i]).size(); it++) {
-                            System.out.println(it + "\t" + trie.autocomplete(str[i]).get(it));
+                        List<String> NewSug = sortList(trie.autocomplete(str[i]),History);
+                        for (int it = 0; it < NewSug.size(); it++) {
+                            System.out.println(it + "\t" + NewSug.get(it));
                         }
                         int SeChoice = input.nextInt();
                         str[i] = trie.autocomplete(str[i]).get(SeChoice);
@@ -41,21 +39,17 @@ public class Main extends Trie {
                         History.add(str[i]);
                     }
                     case 2 -> {
-                        System.out.println(21);
-                        ArrayList<ArrayList<Object>> suggestions = ConnectTwoArray(trie.Suggestions(str[i]), trieReverse.Suggestions(String.valueOf(new StringBuilder(str[i]).reverse())));
+                        ArrayList<HashMap<String, Integer>> suggestions = ConnectTwoArray(trie.Suggestions(str[i]), trieReverse.Suggestions(new StringBuilder(str[i]).reverse().toString()));
 
-                        // Print the suggestions with their corresponding indices
                         for (int index = 0; index < suggestions.size(); index++) {
-                            ArrayList<Object> suggestion = suggestions.get(index);
-                            System.out.println(index + "\t" + suggestion.get(0) + "\t" + suggestion.get(1));
+                            HashMap<String, Integer> suggestion = suggestions.get(index);
+                            System.out.println(index + "\t" + suggestion.get("word") + "\t" + suggestion.get("distance"));
                         }
 
-                        // Get user's choice
                         int userChoice = input.nextInt();
 
-                        // Check if the user's choice is within the valid range
                         if (userChoice >= 0 && userChoice < suggestions.size()) {
-                            String chosenString = (String) suggestions.get(userChoice).get(0);
+                            String chosenString = String.valueOf(suggestions.get(userChoice).get("word"));
                             System.out.println("User chose: " + chosenString);
                             str[i] = chosenString;
                             History.add(chosenString);
@@ -77,29 +71,22 @@ public class Main extends Trie {
         //for(Object word : ConnectTwoArray(trie.Suggestions("ple"),trieReverse.Suggestions(String.valueOf(new StringBuilder("ple").reverse())))){
             //System.out.println(word);
         //}
-        Write.Write(History,"history.txt");
+        Write.WriteToFile(History,"history.txt");
+        Write.WriteToFile(List.of(str),"inputs.txt");
 
 
     }
 
-    public static ArrayList<ArrayList<Object>> ConnectTwoArray(ArrayList<ArrayList<Object>> pre, ArrayList<ArrayList<Object>> suf){
-        ArrayList<ArrayList<Object>> combined = new ArrayList<>(pre);
+    public static ArrayList<HashMap<String, Integer>> ConnectTwoArray(ArrayList<HashMap<String, Integer>> pre, ArrayList<HashMap<String, Integer>> suf) {
+        ArrayList<HashMap<String, Integer>> combined = new ArrayList<>(pre);
         combined.addAll(suf);
 
-//        for(Object i : pre){
-//            System.out.println(i);
-//        }
         reverseStrings(suf);
-//        System.out.println("*");
-//        for (Object y : suf){
-//            System.out.println(y);
-//        }
-//        System.out.println("******\t\t******");
         // Sort the combined ArrayList based on the Integer values in ascending order
-        combined.sort(Comparator.comparingInt(row -> (int) row.get(1)));
+        combined.sort(Comparator.comparingInt(row -> row.get("distance")));
 
         // Create a new ArrayList to hold the top five Strings with the minimum Integer values
-        ArrayList<ArrayList<Object>> result = new ArrayList<>();
+        ArrayList<HashMap<String, Integer>> result = new ArrayList<>();
 
         // Retrieve the top five elements from the combined ArrayList
         for (int i = 0; i < Math.min(5, combined.size()); i++) {
@@ -108,15 +95,29 @@ public class Main extends Trie {
 
         return result;
     }
-    public static void reverseStrings(ArrayList<ArrayList<Object>> list) {
-        for (ArrayList<Object> row : list) {
-            if (row.size() > 0 && row.get(0) instanceof String) {
-                String originalString = (String) row.get(0);
+    public static void reverseStrings(ArrayList<HashMap<String, Integer>> list) {
+        for (HashMap<String, Integer> row : list) {
+            if (row.containsKey("word")) {
+                String originalString = String.valueOf(row.get("word"));
                 String reversedString = new StringBuilder(originalString).reverse().toString();
-                row.set(0, reversedString);
+                row.put("word", Integer.valueOf(reversedString));
             }
         }
     }
+    public static List<String> sortList(List<String> list1, List<String> list2) {
+        // Sort list1
+        Collections.sort(list1);
+        System.out.println("In sortList\n"+list1+"\n"+list2);
 
+        // Create a map to store the count of each word in list2
+        Map<String, Integer> countMap = new HashMap<>();
+        for (String word : list2) {
+            countMap.put(word, countMap.getOrDefault(word, 0) + 1);
+        }
 
+        // Sort list1 based on the count of each word in list2
+        list1.sort((word1, word2) -> countMap.getOrDefault(word2, 0) - countMap.getOrDefault(word1, 0));
+
+        return list1;
+    }
 }
