@@ -103,16 +103,36 @@ class Trie {
         return dis;
     }
 
-    public ArrayList<HashMap<String, Integer>> Suggestions(String fix) {
-        ArrayList<HashMap<String, Integer>> sug = new ArrayList<>();
-        List<String> prefix = autocomplete(fix);
-        for (String word : prefix) {
-            HashMap<String, Integer> suggestion = new HashMap<>();
-            suggestion.put("word", Integer.valueOf(word));
-            suggestion.put("distance", distance(fix, word));
-            sug.add(suggestion);
+    public ArrayList<HashMap<String, Integer>> Suggestions(String fix){
+        ArrayList<ArrayList<Object>> sug = new ArrayList<>();
+        List<String> prefix = new ArrayList<>();
+        prefix = autocomplete(fix);
+        for(String word : prefix){
+            ArrayList<Object> row = new ArrayList<>();
+            row.add(word);
+            row.add(distance(fix,word));
+            sug.add(row);
         }
 
-        return sug;
+        return convertToHashMapList(sug);
+    }
+    public static ArrayList<HashMap<String, Integer>> convertToHashMapList(ArrayList<ArrayList<Object>> inputList) {
+        ArrayList<HashMap<String, Integer>> result = new ArrayList<>();
+
+        for (ArrayList<Object> innerList : inputList) {
+            HashMap<String, Integer> hashMap = new HashMap<>();
+
+            if (innerList.size() >= 2) {
+                Object key = innerList.get(0);
+                Object value = innerList.get(1);
+
+                if (key instanceof String && value instanceof Integer) {
+                    hashMap.put((String) key, (Integer) value);
+                    result.add(hashMap);
+                }
+            }
+        }
+
+        return result;
     }
 }

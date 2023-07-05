@@ -4,7 +4,7 @@ public class Main extends Trie {
     public static void main(String[] args) {
         List<String> words = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
         List<String> wordsReverse = Read.readReverceWordFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\words.txt");
-        List<String> History = Read.readReverceWordFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
+        List<String> History = Read.readWordsFromFile("D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
         Trie trie = new Trie();
         Trie trieReverse = new Trie();
 
@@ -40,16 +40,21 @@ public class Main extends Trie {
                     }
                     case 2 -> {
                         ArrayList<HashMap<String, Integer>> suggestions = ConnectTwoArray(trie.Suggestions(str[i]), trieReverse.Suggestions(new StringBuilder(str[i]).reverse().toString()));
-
-                        for (int index = 0; index < suggestions.size(); index++) {
-                            HashMap<String, Integer> suggestion = suggestions.get(index);
-                            System.out.println(index + "\t" + suggestion.get("word") + "\t" + suggestion.get("distance"));
+                        ArrayList<HashMap<String, Integer>> NewSug = sortList(suggestions,History);
+                        for (int index = 0; index < NewSug.size(); index++) {
+                            HashMap<String, Integer> suggestion = NewSug.get(index);
+                            for (Map.Entry<String, Integer> entry : suggestion.entrySet()) {
+                                String key = entry.getKey();
+                                Integer value = entry.getValue();
+                                System.out.println(index + "\t" + key + "\t=> " + value);
+                            }
                         }
 
                         int userChoice = input.nextInt();
 
-                        if (userChoice >= 0 && userChoice < suggestions.size()) {
-                            String chosenString = String.valueOf(suggestions.get(userChoice).get("word"));
+                        if (userChoice >= 0 && userChoice < NewSug.size()) {
+                            HashMap<String, Integer> suggestion = NewSug.get(userChoice);
+                            String chosenString = suggestion.keySet().iterator().next();
                             System.out.println("User chose: " + chosenString);
                             str[i] = chosenString;
                             History.add(chosenString);
@@ -65,58 +70,69 @@ public class Main extends Trie {
         for(String word : str){
             System.out.print(word+" ");
         }
-//        System.out.println("Trie contains 'apple': " + trie.search("tes"));
-//        System.out.println(trie.autocomplete("ti"));
-//        System.out.println("Trie contains 'apple': " + trie.distance("llll","ap"));
-        //for(Object word : ConnectTwoArray(trie.Suggestions("ple"),trieReverse.Suggestions(String.valueOf(new StringBuilder("ple").reverse())))){
-            //System.out.println(word);
-        //}
-        Write.WriteToFile(History,"history.txt");
-        Write.WriteToFile(List.of(str),"inputs.txt");
-
-
+        Write.WriteToFile(History,"D:\\learn\\Shiraz\\Ds\\DsProject\\src\\history.txt");
     }
 
     public static ArrayList<HashMap<String, Integer>> ConnectTwoArray(ArrayList<HashMap<String, Integer>> pre, ArrayList<HashMap<String, Integer>> suf) {
         ArrayList<HashMap<String, Integer>> combined = new ArrayList<>(pre);
         combined.addAll(suf);
 
-        reverseStrings(suf);
         // Sort the combined ArrayList based on the Integer values in ascending order
-        combined.sort(Comparator.comparingInt(row -> row.get("distance")));
+        combined.sort(Comparator.comparingInt(hashMap -> hashMap.values().iterator().next()));
 
-        // Create a new ArrayList to hold the top five Strings with the minimum Integer values
+        // Create a new ArrayList to hold the top five HashMaps with the minimum Integer values
         ArrayList<HashMap<String, Integer>> result = new ArrayList<>();
 
         // Retrieve the top five elements from the combined ArrayList
         for (int i = 0; i < Math.min(5, combined.size()); i++) {
-            result.add(combined.get(i));
+            HashMap<String, Integer> hashMap = combined.get(i);
+            result.add(hashMap);
         }
 
         return result;
     }
-    public static void reverseStrings(ArrayList<HashMap<String, Integer>> list) {
-        for (HashMap<String, Integer> row : list) {
-            if (row.containsKey("word")) {
-                String originalString = String.valueOf(row.get("word"));
-                String reversedString = new StringBuilder(originalString).reverse().toString();
-                row.put("word", Integer.valueOf(reversedString));
+
+    private static void reverseStrings(ArrayList<HashMap<String, Integer>> list) {
+        for (HashMap<String, Integer> hashMap : list) {
+            for (Map.Entry<String, Integer> entry : hashMap.entrySet()) {
+                String key = entry.getKey();
+                Integer value = entry.getValue();
+
+                String reversedKey = new StringBuilder(key).reverse().toString();
+                hashMap.put(reversedKey, value);
+                hashMap.remove(key);
             }
         }
     }
-    public static List<String> sortList(List<String> list1, List<String> list2) {
-        // Sort list1
-        Collections.sort(list1);
-        System.out.println("In sortList\n"+list1+"\n"+list2);
 
-        // Create a map to store the count of each word in list2
-        Map<String, Integer> countMap = new HashMap<>();
+    public static List<String> sortList(List<String> list1, List<String> list2) {
+        Map<String, Integer> wordCount = new HashMap<>();
+        // Count the occurrences of words from List2 in List1
         for (String word : list2) {
-            countMap.put(word, countMap.getOrDefault(word, 0) + 1);
+            if (list1.contains(word)) {
+                wordCount.put(word, wordCount.getOrDefault(word, 0) + 1);
+            }
         }
 
-        // Sort list1 based on the count of each word in list2
-        list1.sort((word1, word2) -> countMap.getOrDefault(word2, 0) - countMap.getOrDefault(word1, 0));
+        // Sort List1 based on the word count in descending order
+        list1.sort((a, b) -> wordCount.getOrDefault(b, 0) - wordCount.getOrDefault(a, 0));
+
+        return list1;
+    }
+    public static ArrayList<HashMap<String, Integer>> sortList(ArrayList<HashMap<String, Integer>> list1, List<String> list2) {
+        HashMap<String, Integer> wordCount = new HashMap<>();
+
+        // Count the occurrences of words from List2 in List1
+        for (HashMap<String, Integer> word : list1) {
+            String wordString = word.keySet().iterator().next();
+            if (list2.contains(wordString)) {
+                wordCount.put(wordString, wordCount.getOrDefault(wordString, 0) + 1);
+            }
+        }
+
+        // Sort List1 based on the word count in descending order
+        list1.sort((a, b) -> wordCount.getOrDefault(b.keySet().iterator().next(), 0) -
+                wordCount.getOrDefault(a.keySet().iterator().next(), 0));
 
         return list1;
     }
