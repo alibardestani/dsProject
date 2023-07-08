@@ -66,6 +66,8 @@ class Trie {
         List<String> suggestions = new ArrayList<>();
         autocompleteHelper(current, prefix, suggestions);
 
+        System.out.println("In AutoComplete\t"+suggestions);
+
         if(suggestions.size() > 5){
             suggestions = suggestions.subList(0,5);
         }
@@ -113,6 +115,7 @@ class Trie {
             row.add(distance(fix,word));
             sug.add(row);
         }
+        System.out.println(sug);
 
         return convertToHashMapList(sug);
     }
